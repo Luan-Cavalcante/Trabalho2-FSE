@@ -3,21 +3,33 @@ import temp_ambiente
 import gpio
 from gpio import Gpio
 
-def main():
+def init_system()->None:
     pid.pid_configura_constantes(30.0,0.2,400.0)
     pid.pid_atualiza_referencia(80.0)
-
     print(pid.pid_controle(35.0))
-
-    data = temp_ambiente.sample_temp()
-
-    print(data.temperature)
     my_gpio = Gpio(23,24)
 
-    if pid.pid_controle(35.0) > 40:
-        print('aí muda carai')
+
+
+def main():
+    data = temp_ambiente.sample_temp()
+
+    init_system()
     
     my_gpio.hello()
+
+    # main loop
+    while True:
+        # estado desligado
+        
+
+        # estado ligado e sistema desligado
+            # liga led e tals
+
+
+        # estado ligado e sistema ligado
+
+
 
 if __name__ == '__main__':
     main()

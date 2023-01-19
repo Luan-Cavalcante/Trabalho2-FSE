@@ -1,4 +1,6 @@
 from crc import calcula_CRC
+import serial
+from time import sleep
 
 class InterfaceComando():
     def __init__(self) -> None:
@@ -15,23 +17,29 @@ class InterfaceComando():
         self.subcodigo_modo_controle = bytes([int('0xD4',16)])
         self.subcodigo_estado_func = bytes([int('0xD5',16)])
         self.subcodigo_temp_ambiente = bytes([int('0xD6',16)])
+        self.ser = serial.Serial ("/dev/ttyS0", 9600)
 
     def monta_mensagem(self):
         mensagem = self.esp32_code + self.codigo_solicita + self.subcodigo_temp_interna + self.matricula
         crc = calcula_CRC(mensagem)
-
         mensagem = mensagem + crc
-
         print(len(mensagem))
         return mensagem
 
     def envia_mensagem(self):
-        ser = serial.Serial ("/dev/ttyS0", 9600)    #Open port with baud rate
+            #Open port with baud rate
         mensagem = self.monta_mensagem()
-        ser.write(mensagem) 
+        print(mensagem)
+        self.ser.write(mensagem)
+    
+    def recebe_mensagem(self):
+        self.ser.read(mensagem)
+
+        print(mensagem)
+        print(type(mensagem))
 
     def valida_mensagem_retorno(self):
-        pass
+        
 
 
 if __name__ == '__main__':
