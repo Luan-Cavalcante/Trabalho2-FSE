@@ -43,3 +43,4 @@ class Gpio(metaclass=SingletonMeta):
     def change_resistor_duty(self, duty:int) -> None:
         self.resistor.ChangeDutyCycle(duty)
         print("Duty mudada")
+    

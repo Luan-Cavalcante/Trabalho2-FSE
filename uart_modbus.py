@@ -19,28 +19,60 @@ class InterfaceComando():
         self.subcodigo_temp_ambiente = bytes([int('0xD6',16)])
         self.ser = serial.Serial ("/dev/ttyS0", 9600)
 
-    def monta_mensagem(self):
-        mensagem = self.esp32_code + self.codigo_solicita + self.subcodigo_temp_interna + self.matricula
+    def le_comando_usuario(self):
+        mensagem = self.esp32_code + self.codigo_solicita + self.subcodigo_le_comando + self.matricula
+        crc = calcula_CRC(mensagem)
+        mensagem = mensagem + crc
+
+        mensagem = self.recebe_mensagem()
+
+        self.envia_mensagem(mensagem)
+        sleep(0.03)
+
+        mensagem = self.recebe_mensagem()
+        
+        ###
+        ### Trata comando, para pegar essa parada
+        ###
+
+        return comando
+
+    def monta_mensagem(self,codigo,subcodigo):
+        mensagem = self.esp32_code + bytes([int(codigo,16)]) + bytes([int(subcodigo,16)]) + self.matricula
         crc = calcula_CRC(mensagem)
         mensagem = mensagem + crc
         print(len(mensagem))
         return mensagem
 
-    def envia_mensagem(self):
-            #Open port with baud rate
-        mensagem = self.monta_mensagem()
+    def envia_mensagem(self,mensagem):
+        #Open port with baud rate
         print(mensagem)
         self.ser.write(mensagem)
     
     def recebe_mensagem(self):
-        self.ser.read(mensagem)
-
-        print(mensagem)
-        print(type(mensagem))
-
-    def valida_mensagem_retorno(self):
+        mensagem = self.ser.read(9)
+        if self.valida_mensagem_retorno(mensagem):
+            print("Mensagem válida")
+            print(mensagem)
+            print(type(mensagem))
+            return mensagem
+        else:
+            print("mensagem inválida")
+            return 'erro'
         
 
+    def valida_mensagem_retorno(self,mensagem) -> bool:
+        if calcula_CRC(mensagem) == mensagem[-2:]:
+            print("CRC funcionando")
+            return True
+        else:
+            print("CRC bichado")
+            return False
+
+    def ligar(self):
+        mensagem = self.monta_mensagem(self.codigo_envia,self.subcodigo_estado_sys)
+        self.envia_mensagem(mensagem)
+        
 
 if __name__ == '__main__':
     i = InterfaceComando()

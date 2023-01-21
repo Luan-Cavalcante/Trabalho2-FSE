@@ -44,3 +44,7 @@ def calcula_CRC(commands):
         crc = CRC16(crc, commands[i])
 
     return struct.pack('H',crc)
+
+tripao = bytes([int('0x23',16)]) + bytes([int('0xc1',16)]) + bytes([int('1',16)]) + bytes([int('8',16)]) + bytes([int('3',16)]) + bytes([int('6',16)])
+
+print(type(calcula_CRC(tripao)))
