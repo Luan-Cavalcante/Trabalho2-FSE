@@ -1,11 +1,11 @@
 import pid
-import temp_ambiente
+#import temp_ambiente
 import gpio
 from gpio import Gpio
 from uart_modbus import InterfaceComando
 
 def main():
-    data = temp_ambiente.sample_temp()
+    #data = temp_ambiente.sample_temp()
     pid.pid_configura_constantes(30.0,0.2,400.0)
     pid.pid_atualiza_referencia(80.0)
     print(pid.pid_controle(35.0))
@@ -18,7 +18,10 @@ def main():
     # main loop
     while True:
         # estado desligado
-        comando = interface.le_comando_usuario()
+        #comando = interface.le_comando_usuario()
+
+        mensagem = interface.monta_mensagem(0x23,0xC1)
+        interface.envia_mensagem(mensagem)
 
         # se comando for ligar
             # estado ligado.
@@ -41,7 +44,7 @@ def main():
         
         # estado ligado e sistema ligado
 
-        time.sleep(0.5)
+        time.sleep(2)
 
 
 if __name__ == '__main__':

@@ -37,14 +37,15 @@ def CRC16(crc, data):
 
     return ((crc & 0xFF00) >> 8) ^ tbl[(crc & 0x00FF) ^ (data & 0x00FF)]
 
+
 def calcula_CRC(commands):
     crc = 0
-
     for i in range(len(commands)):
         crc = CRC16(crc, commands[i])
 
-    return struct.pack('H',crc)
+    crc = struct.pack('H',crc)
+    #print(crc[0])
+    #print(type(crc[0]))
+    #print(crc[1])
 
-tripao = bytes([int('0x23',16)]) + bytes([int('0xc1',16)]) + bytes([int('1',16)]) + bytes([int('8',16)]) + bytes([int('3',16)]) + bytes([int('6',16)])
-
-print(type(calcula_CRC(tripao)))
+    return crc
