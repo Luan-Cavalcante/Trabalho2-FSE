@@ -32,11 +32,26 @@ class InterfaceComando():
 
         mensagem = self.recebe_mensagem()
         
-        ###
-        ### Trata comando, para pegar essa parada
-        ###
-
         return comando
+    
+    def desliga_all(self):
+        self.envia_mensagem('0xD4','0x00')
+        self.envia_mensagem('0xD5','0x00')
+        self.envia_mensagem('0xD3','0x00')
+
+    def envia_sinal_controle(self,valor:int):
+        valor_int_em_bytes = struct.pack('<i',valor)
+        print(valor_int_em_bytes)
+        print(len(valor_int_em_bytes))
+
+        mensagem = self.esp32_code + bytes([int('0x16',16)]) + bytes([int('0xD1',16)]) + self.matricula + valor_int_em_bytes
+        
+        crc = calcula_CRC(mensagem)
+
+        mensagem = mensagem + crc
+
+        self.ser.write(mensagem)
+
 
     def monta_mensagem(self,subcodigo,valor = ''):
 
@@ -55,9 +70,9 @@ class InterfaceComando():
         #print(len(mensagem))
         return mensagem
 
-    def envia_mensagem(self,mensagem):
-        #Open port with baud rate
-        #print(mensagem)
+    def envia_mensagem(self,subcodigo,valor = ''):
+        mensagem = self.monta_mensagem(subcodigo,valor)
+
         self.ser.write(mensagem)
     
     def le_serial(self):
@@ -73,14 +88,8 @@ class InterfaceComando():
     def recebe_mensagem(self):
 
         mensagem = self.ser.read(9)
-        
-        print('já recebi')
 
         if self.valida_mensagem_retorno(mensagem):
-            print("Mensagem válida")
-
-            # se for, processa como float
-
             numero = mensagem[3:len(mensagem)-2]
 
             if mensagem[2] < 195:
@@ -95,8 +104,6 @@ class InterfaceComando():
                 integer = struct.unpack('<i', numero)[0]
                 print(integer)
                 return integer
-
-            return mensagem
         else:
             print("mensagem inválida")
             return 'erro'
@@ -106,33 +113,18 @@ class InterfaceComando():
             print(i)
 
     def valida_mensagem_retorno(self,mensagem) -> bool:
-        print("Validando mensagem")
-
-        self.mostra_mensagem(mensagem)
+        print("Validando mensagem . . .")
 
         crc = calcula_CRC(mensagem[:-2])
 
         if crc == mensagem[-2:]:
-            print("CRC funcionando")
+            #print("CRC funcionando")
             return True
         else:
-            print("CRC bichado")
+            #print("CRC bichado")
             return False
 
     def ligar(self):
         mensagem = self.monta_mensagem(self.codigo_envia,self.subcodigo_estado_sys)
         self.envia_mensagem(mensagem)
-        
-if __name__ == "__main__":
-    i =  InterfaceComando()
-    
-    while True:
-        mensagem = i.monta_mensagem('0xC3')
-        i.envia_mensagem(mensagem)
-        sleep(1)
-        comando = i.recebe_mensagem()
-        if comando == int('0xA1',16):
-            print('LIGA O SISTEMA DJOW')
-            # enviar pro 
-            mensagem = i.monta_mensagem('0xD3','0x00')
-            i.envia_mensagem(mensagem)
+

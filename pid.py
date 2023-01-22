@@ -17,3 +17,4 @@ def pid_atualiza_referencia(referencia):
 
 def pid_controle(temp_interna):
     return pid_functions.pid_controle(temp_interna)
+

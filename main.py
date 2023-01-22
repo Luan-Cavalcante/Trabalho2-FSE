@@ -1,50 +1,76 @@
 import pid
-#import temp_ambiente
+import temp_ambiente
 import gpio
 from gpio import Gpio
 from uart_modbus import InterfaceComando
+import time
 
 def main():
-    #data = temp_ambiente.sample_temp()
-    pid.pid_configura_constantes(30.0,0.2,400.0)
+    data = temp_ambiente.sample_temp()
+    my_gpio = Gpio()
+    
+    my_gpio.pid_configura_constantes(30.0,0.2,400.0)
     pid.pid_atualiza_referencia(80.0)
     print(pid.pid_controle(35.0))
-    my_gpio = Gpio(23,24)
     
     my_gpio.hello()
-
-    interface = InterfaceComando()
-
     # main loop
+    interface =  InterfaceComando()
+    state = 0
+    modo = True
+
     while True:
-        # estado desligado
-        #comando = interface.le_comando_usuario()
 
-        mensagem = interface.monta_mensagem(0x23,0xC1)
-        interface.envia_mensagem(mensagem)
+        if state == 2:
+            my_gpio.controle_temp()
 
-        # se comando for ligar
+        interface.envia_mensagem('0xC3')
+        time.sleep(0.03)
+        comando = interface.recebe_mensagem()
+
+        # máquina de estadoooooo
+        if comando == int('0xA1',16):
+            # se comando for ligar
             # estado ligado.
-            # interface ligar.
             # que significa ligar o LED, e esperar o aquecimento.
-        
-        # se comando for desligar 
+            print('LIGA O SISTEMA DJOW')
+            # enviar pro 
+            interface.envia_mensagem('0xD3','0x01')
+            state = 1
+
+        elif comando == int('0xA2',16):
+            # se comando for desligar 
             # estado desligado
+            print('DESLIGA AÍ DJOW')
+            interface.desliga_all()
+            state = 0
 
-        # se comando for iniciar aquecimento e não tiver ligado, faz o quê ?
+        elif comando == int('0xA3',16):
+            print('INICIOOOOUUU O PROCESSO')
+            interface.envia_mensagem('0xD5','0x01')
 
-        # se comando for altera processo 
+            # Inicia o controle de temp
+            state = 2
+
+            my_gpio.controle_temp()
+    
+        elif comando == int('0xA4',16):
+            # se comando for iniciar aquecimento e não tiver ligado, faz o quê ?
+            # se comando for cancela processo, para tudo.
+        
+            print('CANCELA AÍ VEI')
+            interface.envia_mensagem('0xD5','0x00')
+
+        elif comando == int('0xA5',16):
+            # se comando for altera processo 
             # muda aquecimento por referência, para aquecimento por curva
-        
-        # se comando for cancela processo, para tudo.
-        
+            modo = not modo
+            codigo = '0x00' if modo else '0x01'
+            
+            print("Change CHAAAAANGEEEE")
+            interface.envia_mensagem('0xD4',codigo)
 
-        # estado ligado e sistema desligado
-            # liga led e tals
-        
-        # estado ligado e sistema ligado
-
-        time.sleep(2)
+        time.sleep(0.5)
 
 
 if __name__ == '__main__':
