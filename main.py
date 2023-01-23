@@ -23,6 +23,7 @@ def main():
 
         if state == 2:
             my_gpio.controle_temp()
+            continue
 
         interface.envia_mensagem('0xC3')
         time.sleep(0.03)

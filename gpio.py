@@ -32,8 +32,11 @@ class Gpio(metaclass=SingletonMeta):
         GPIO.setup(24, GPIO.OUT)
 
         # estudar PWM
-        self.resistor = GPIO.PWM(23,500)
-        self.ventoinha = GPIO.PWM(24,500)
+        self.resistor = GPIO.PWM(23,1000)
+        self.ventoinha = GPIO.PWM(24,1000)
+
+        self.resistor.start(0)
+        self.ventoinha.start(0)
 
         # interface de comando 
         self.interface = InterfaceComando()
@@ -54,7 +57,6 @@ class Gpio(metaclass=SingletonMeta):
         self.Kd = Kd_
 
     def pid_controle(self,saida_medida: float)-> float:
-
         erro = self.referencia - saida_medida
         print(self.referencia)
         print(f'error eh de {erro}')
@@ -90,13 +92,23 @@ class Gpio(metaclass=SingletonMeta):
     def hello(self):
         print("Hello from singleton class")
 
-    def change_fan_duty(self,duty : int) -> None:
+    def esfria(self,duty : int) -> None:
+
+        duty = abs(duty)
+
+        if duty > 0 and duty < 40:
+            duty = 40
+
         self.ventoinha.ChangeDutyCycle(duty)
-        print(f"Duty mudada para {duty}")
+        #print(f"Duty mudada para {duty}")
     
-    def change_resistor_duty(self, duty:int) -> None:
+    def esquenta(self, duty:int) -> None:
+        if duty < 0:
+            print("Tem alguma coisa errada, duty negativo\n")
+            return 
+
         self.resistor.ChangeDutyCycle(duty)
-        print(f"Duty mudada para {duty}")
+        #print(f"Duty mudada para {duty}")
 
     def controle_temp(self):
         # Lê temperatura interna
@@ -114,29 +126,18 @@ class Gpio(metaclass=SingletonMeta):
         temperatura_ambiente = data.temperature
 
         # atualiza referência
-        self.pid_atualiza_referencia(80)
+        self.pid_atualiza_referencia(temperatura_ref)
 
         # pid controle
         sinal_controle = int(self.pid_controle(temperatura_interna))
 
         print(f"Temperatura referência : {temperatura_ref}\nTemperatura Interna : {temperatura_interna}\nSinal controle :{sinal_controle}")
 
-        return 
-
         # atualiza pwm
-        '''
         if sinal_controle > 0:
-            print('aumentando . . .')
-            self.change_resistor_duty(sinal_controle)
-
+            self.esquenta(sinal_controle)
         else:    
-            if sinal_controle < 0 and sinal_controle > -40:
-                print('eh 40 véio')
-                sinal_controle = -40
-                self.change_fan_duty(sinal_controle)
-            
-            self.change_fan_duty(sinal_controle)
-        '''
+            self.esfria(sinal_controle)
         
         print(f"sinal de controle : {sinal_controle}")
         self.interface.envia_sinal_controle(sinal_controle)

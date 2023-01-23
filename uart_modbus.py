@@ -93,14 +93,14 @@ class InterfaceComando():
             numero = mensagem[3:len(mensagem)-2]
 
             if mensagem[2] < 195:
-                print("sou flooooat")
+                #print("sou flooooat")
                 floating_point_number = struct.unpack('<f', numero)[0]
                 print(floating_point_number)
 
                 return floating_point_number
             else:
                 # interpreta como inteiro
-                print('sou inteeeirooooooo')
+                #print('sou inteeeirooooooo')
                 integer = struct.unpack('<i', numero)[0]
                 print(integer)
                 return integer
@@ -113,7 +113,7 @@ class InterfaceComando():
             print(i)
 
     def valida_mensagem_retorno(self,mensagem) -> bool:
-        print("Validando mensagem . . .")
+        #print("Validando mensagem . . .")
 
         crc = calcula_CRC(mensagem[:-2])
 
