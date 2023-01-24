@@ -1,4 +1,11 @@
 from uart_modbus import InterfaceComando
+import pandas as pd
+from Pid import PID
+import RPi.GPIO as GPIO
+import time
+import temp_ambiente
+
+
 class SingletonMeta(type):
     """
     The Singleton class can be implemented in different ways in Python. Some
@@ -21,6 +28,7 @@ class SingletonMeta(type):
 
 class Forno(metaclass=SingletonMeta):
     def __init__(self):
+
         self.estado = False
         self.temp_interna = 0
         self.temp_referencia = 0
@@ -28,6 +36,8 @@ class Forno(metaclass=SingletonMeta):
         self.funcionando = False
         self.interface = InterfaceComando()
         self.modo = True
+        self.pid_value = 0
+        self.PID = PID()
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(23, GPIO.OUT)
@@ -43,9 +53,11 @@ class Forno(metaclass=SingletonMeta):
         self.interface.liga_forno()
         self.estado = True
     
-    def desliga(self)
+    def desliga(self):
         self.interface.desliga_all()
         self.estado = False
+        self.pid_value = 0
+        self.modo = True
     
     def funcionando(self):
         return self.funcionando
@@ -84,7 +96,7 @@ class Forno(metaclass=SingletonMeta):
     
     def atualiza_temp_ref(self):
         self.interface.envia_mensagem('0xC2')
-        time.sleep(0.2)
+        time.sleep(0.5)
         temperatura_ref = self.interface.recebe_mensagem()
         self.temp_referencia = temperatura_ref
 
@@ -93,9 +105,14 @@ class Forno(metaclass=SingletonMeta):
         data = temp_ambiente.sample_temp()
         self.temp_ambiente = data.temperature
 
+    def show(self):
+        print(f"Temperatura Interna : {self.temp_interna}")
+        print(f"Temperatura Referência : {self.temp_referencia}")
+        print(f"Temperatura Ambiente : {self.temp_ambiente}")
+
     def atualiza_temp_interna(self):
         self.interface.envia_mensagem('0xC1')
-        time.sleep(0.2)
+        time.sleep(0.5)
         temperatura_interna = self.interface.recebe_mensagem()
         self.temp_interna = temperatura_interna
 
@@ -106,10 +123,11 @@ class Forno(metaclass=SingletonMeta):
         temp_ambiente = self.temp_ambiente
         
         # atualiza referência
-        self.pid.pid_atualiza_referencia(temp_referencia)
+        self.PID.pid_atualiza_referencia(temp_referencia)
 
         # pid controle
-        sinal_controle = int(self.pid.pid_controle(temp_interna))
+        sinal_controle = int(self.PID.pid_controle(temp_interna))
+        self.pid_value = sinal_controle
         print(f"Temperatura referência : {temp_referencia}\nTemperatura Interna : {temp_interna}\nSinal controle :{sinal_controle}")
 
         if sinal_controle > 0:
@@ -121,5 +139,13 @@ class Forno(metaclass=SingletonMeta):
 
         self.interface.envia_sinal_controle(sinal_controle)
 
-    
+    def curva(self):
+        curva = pd.read_csv('curva_reflow.csv')
+        times = list(curva['Tempo'])
+        temperaturas = list(curva['Temperatura'])
+
+        print(times,temperaturas)
+        while True:
+
+
     

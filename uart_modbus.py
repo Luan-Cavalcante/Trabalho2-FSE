@@ -2,7 +2,6 @@ from crc import calcula_CRC
 import serial
 from time import sleep
 import struct
-from forno import Forno
 
 class InterfaceComando():
     def __init__(self) -> None:
@@ -111,4 +110,3 @@ class InterfaceComando():
     def ligar(self):
         mensagem = self.monta_mensagem(self.codigo_envia,self.subcodigo_estado_sys)
         self.envia_mensagem(mensagem)
-

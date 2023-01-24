@@ -5,6 +5,7 @@ from gpio import Gpio
 from uart_modbus import InterfaceComando
 import time
 from forno import Forno
+import log 
 
 def main():
     data = temp_ambiente.sample_temp()
