@@ -4,29 +4,22 @@ import gpio
 from gpio import Gpio
 from uart_modbus import InterfaceComando
 import time
+from forno import Forno
 
 def main():
     data = temp_ambiente.sample_temp()
     my_gpio = Gpio()
-    
-    my_gpio.pid_configura_constantes(30.0,0.2,400.0)
-    pid.pid_atualiza_referencia(80.0)
-    print(pid.pid_controle(35.0))
-    
-    my_gpio.hello()
-    # main loop
     interface =  InterfaceComando()
     state = 0
     modo = True
+    forno = Forno()
 
     while True:
-
         if state == 2:
             my_gpio.controle_temp()
-            continue
+        #comando = interface.le_comando_usuario()
 
         interface.envia_mensagem('0xC3')
-        time.sleep(0.03)
         comando = interface.recebe_mensagem()
 
         # máquina de estadoooooo
@@ -36,8 +29,8 @@ def main():
             # que significa ligar o LED, e esperar o aquecimento.
             print('LIGA O SISTEMA DJOW')
             # enviar pro 
+            #interface.liga_forno()
             interface.envia_mensagem('0xD3','0x01')
-            state = 1
 
         elif comando == int('0xA2',16):
             # se comando for desligar 
@@ -72,7 +65,6 @@ def main():
             interface.envia_mensagem('0xD4',codigo)
 
         time.sleep(0.5)
-
 
 if __name__ == '__main__':
     main()

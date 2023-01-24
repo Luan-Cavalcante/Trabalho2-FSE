@@ -2,6 +2,7 @@ from crc import calcula_CRC
 import serial
 from time import sleep
 import struct
+from forno import Forno
 
 class InterfaceComando():
     def __init__(self) -> None:
@@ -21,19 +22,10 @@ class InterfaceComando():
         self.ser = serial.Serial ("/dev/ttyS0", 9600)
 
     def le_comando_usuario(self):
-        mensagem = self.esp32_code + self.codigo_solicita + self.subcodigo_le_comando + self.matricula
-        crc = calcula_CRC(mensagem)
-        mensagem = mensagem + crc
-
-        mensagem = self.recebe_mensagem()
-
-        self.envia_mensagem(mensagem)
-        sleep(0.03)
-
-        mensagem = self.recebe_mensagem()
-        
+        self.envia_mensagem('0xC3')
+        comando = self.recebe_mensagem()
         return comando
-    
+
     def desliga_all(self):
         self.envia_mensagem('0xD4','0x00')
         self.envia_mensagem('0xD5','0x00')
@@ -52,7 +44,10 @@ class InterfaceComando():
 
         self.ser.write(mensagem)
 
-
+    def liga_forno(self,):
+        self.envia_mensagem('0xD3','0x01')
+        #mensagem = self.recebe_mensagem()
+    
     def monta_mensagem(self,subcodigo,valor = ''):
 
         codigo = '0x23' if int(subcodigo,16) > 0xD0 else '0x16'
@@ -74,19 +69,8 @@ class InterfaceComando():
         mensagem = self.monta_mensagem(subcodigo,valor)
 
         self.ser.write(mensagem)
-    
-    def le_serial(self):
-        for i in range(9):
-            received_data = self.ser.read()              #read serial port
-            sleep(0.03)
-            data_left = self.ser.inWaiting()             #check for remaining byte
-            received_data += self.ser.read(data_left)
-            print(f'recebi {received_data}')
-        
-        return received_data
 
     def recebe_mensagem(self):
-
         mensagem = self.ser.read(9)
 
         if self.valida_mensagem_retorno(mensagem):
