@@ -145,7 +145,6 @@ class Forno(metaclass=SingletonMeta):
         temperaturas = list(curva['Temperatura'])
 
         print(times,temperaturas)
-        while True:
-
+            
 
     

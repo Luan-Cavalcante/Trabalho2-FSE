@@ -18,6 +18,7 @@ def main():
                 forno.atualiza_temp_ref()
                 forno.atualiza_temp_ambiente()
                 forno.show()
+                
                 if forno.modo:
                     forno.controle_temp()
                 else:
@@ -44,12 +45,11 @@ def main():
                 # se comando for altera processo 
                 # muda aquecimento por referência, para aquecimento por curva
                 forno.change_mode()
-            
         else:
             if comando == int('0xA1',16):
                 # se comando for ligar
+                print('LIGOOUU')
                 forno.liga()
-
         mensagem = f'{forno.temp_interna},{forno.temp_ambiente},{forno.temp_referencia},{forno.pid_value}'
         log(mensagem)
         time.sleep(0.5)
