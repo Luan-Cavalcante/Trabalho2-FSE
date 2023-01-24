@@ -22,3 +22,5 @@ Este trabalho tem por objetivo a implementação de um sistema (que simula) o co
 # Fotos da execução
 
 ![Screenshot from 2023-01-23 15-18-16](https://user-images.githubusercontent.com/67024690/214221848-1b8f0b91-4b1b-4015-8ed6-8938bfc0aa5f.png)
+
+![Screenshot from 2023-01-24 02-57-38](https://user-images.githubusercontent.com/67024690/214222143-84653553-58a2-4593-848a-c9d46167de84.png)
