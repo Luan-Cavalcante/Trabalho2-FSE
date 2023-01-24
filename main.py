@@ -70,7 +70,7 @@ def main():
             
             print("Change CHAAAAANGEEEE")
             interface.envia_mensagem('0xD4',codigo)
-
+        
         time.sleep(0.5)
 
 
